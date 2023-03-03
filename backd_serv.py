@@ -1,5 +1,6 @@
 import socket
 import os
+import platform
 
 PORT = 8081
 IP = "0.0.0.0"
@@ -19,11 +20,18 @@ print("Waitng for connexion")
 s.listen(5)
 
 client, address = s.accept()
-
 print(f"{address} connected")
 
+
+#Determine l'os pour adapter les commandes
+commands = {"pwd": "pwd", "ls": "ls"}
+
+if platform.platform(terse=True).startswith("Windows"):
+    commands = {"pwd": "echo %cd%", "ls": "dir"}
+
+
 # obtenir le path directory au debut
-client.sendall("pwd".encode())
+client.sendall(commands["pwd"].encode())
 path_directory = client.recv(1024)
 path_directory =  path_directory.decode()
 
@@ -34,7 +42,7 @@ while 1:
         text = input(path_directory + " = ")
         if text == "exit":
             break
-
+        
         client.sendall(text.encode())
         
         response = client.recv(1024).decode()
@@ -47,7 +55,5 @@ while 1:
                 print("from client: " + response)
         
         
-
-
 print("CLOSE")
 client.close()
