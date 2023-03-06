@@ -41,29 +41,33 @@ while 1:
                 response_list = response.split()
                 print("RECU", response_list)
                 
-                # si la commande est un "cd"
-                if len(response_list) == 2 and response_list[0] == "cd":
-                    print("TEST", response_list)
-                    os.chdir(response_list[1])
-                    response_list = [commands["pwd"]]
-                    print("result" , response_list)
-                
-                
                 #si la commande est un ls
                 if response_list[0] == "ls":
                     response_list = [commands["ls"]]
                     print("result" , response_list)
-                
                 try:
-                    result = subprocess.run(response_list, shell=True, capture_output=True, text=True, )
-                    
+
+                    # si la commande est un "cd"
+                    if response_list[0] == "cd":
+                        
+                        if response_list[1] == ".." or os.path.exists(response_list[1]):
+                            os.chdir(response_list[1])
+                            result = subprocess.run(commands["pwd"], shell=True, capture_output=True, text=True)
+                        else:
+                            result = "This path does not exist"
+                    else:
+                        result = subprocess.run(response_list ,shell=True, capture_output=True, text=True, )
+                   
                     # si le canal stderr (erreur) n'est pas vide
                     if result.stderr != "":
                         to_serv = result.stdout + "\n\nERREUR: " + result.stderr
-                    else: 
+                    else:
+                        print("NORMAL")
                         to_serv = result.stdout
                 except:
-                    to_serv = "ERREUR INNATTENDU",  error
-
-    print("ENVOIE TO SERVV: " + to_serv)
+                    to_serv = "ERREUR INNATTENDU" +  error
+                    
+    print("RESULT", result)
+    print("ENVOIE TO SERVV: "+ to_serv)
     s.sendall(to_serv.encode())
+    

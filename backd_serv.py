@@ -35,21 +35,21 @@ client.sendall(commands["pwd"].encode())
 path_directory = client.recv(1024)
 path_directory =  path_directory.decode()
 
-
 # boucle de commande
 while 1:
 
         text = input(path_directory + " = ")
         if text == "exit":
             break
-        
+         
         client.sendall(text.encode())
         
         response = client.recv(1024).decode()
         
-        # si la reponse est pour un changement de repertoire 
-        if response.startswith("CD") :
-            path_directory = response[2:]
+        # si la reponse est pour un changement de repertoire
+        if response.startswith("") :
+            print("YHEAAAAAAAAAAAAAAAAAAAAAAAA")
+            path_directory = response
         
         elif response != "":
                 print("from client: " + response)
